@@ -1,33 +1,33 @@
 node {
     def app
 
-    stage('Clone repository') {
+    stage('Checkout Code') {
       
 
         checkout scm
     }
 
-    stage('Build image') {
+    stage('Build Image') {
   
-       app = docker.build("joeygeofrey/test")
+       app = docker.build("joeygeofrey/fblog")
     }
 
-    stage('Test image') {
+    stage('Test Image') {
 
         app.inside {
             sh 'echo "Tests passed"'
         }
     }
 
-    stage('Push image') {
+    stage('Push Image') {
         
         docker.withRegistry('https://registry.hub.docker.com', 'dockerhub') {
             app.push("${env.BUILD_NUMBER}")
         }
     }
     
-    stage('Trigger ManifestUpdate') {
+    stage('Update Manifest') {
                 echo "triggering updatemanifestjob"
-                build job: 'updatemanifest', parameters: [string(name: 'DOCKERTAG', value: env.BUILD_NUMBER)]
+                build job: 'FlaskBlog_CD', parameters: [string(name: 'DOCKERTAG', value: env.BUILD_NUMBER)]
         }
 }
